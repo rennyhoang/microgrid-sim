@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/sidebar"
 import Link from 'next/link'; // Import Link from Next.js for client-side navigation
 import { usePathname } from "next/navigation";
+import { useState } from "react";
  
 export function AppSidebar() {
     const pathname = usePathname();

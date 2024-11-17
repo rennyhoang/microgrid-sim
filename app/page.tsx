@@ -1,9 +1,8 @@
-// app/page.tsx
+import { Landing } from '../components/landing';
 export default function Home() {
-    return (
-      <div>
-        <h1>Welcome to the Home Page!</h1>
-        <p>This is the home page of your Next.js app.</p>
-      </div>
-    );
-  }
+  return (
+    <div className="w-full min-h-screen items-center justify-center">
+      <Landing />
+    </div>
+  );
+}

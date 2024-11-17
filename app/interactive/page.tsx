@@ -1,6 +1,6 @@
 import Flow from "../components/Flow";
 
-export default function Home() {
+export default function Interactive() {
   return (
     <Flow />
   );
