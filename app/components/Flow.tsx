@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import {ReactFlow} from '@xyflow/react';
 import {Background, BackgroundVariant, Node, Edge, addEdge, applyNodeChanges, applyEdgeChanges, type OnConnect, type OnNodesChange, type OnEdgesChange} from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
@@ -24,6 +24,9 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
+import { Input } from "@/components/ui/input"
+import BatteryNode from './BatteryNode';
+import PanelNode from './PanelNode';
 
 interface SolarPanel {
   brand: string;
@@ -58,6 +61,7 @@ const batteryFormSchema = z.object({
 })
 
 function Flow() {
+  const nodeTypes = useMemo(() => ({ battery: BatteryNode, panel: PanelNode }), []);
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
   const [totalCost, setTotalCost] = useState(0);
@@ -93,6 +97,36 @@ function Flow() {
     [setEdges],
   );
 
+  const onSave = useCallback(() => {
+    const flow = {
+      nodes,
+      edges,
+      totalCost,
+      totalWattage, 
+      totalStorage
+    };
+
+  const blob = new Blob([JSON.stringify(flow)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'flow.json';
+      link.click();
+    }, [nodes, edges, totalCost, totalWattage, totalStorage]);
+
+    const onRestore = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const fileReader = new FileReader();
+    fileReader.onload = (e) => {
+      const flow = JSON.parse(e.target?.result as string);
+      setNodes(flow.nodes);
+      setEdges(flow.edges);
+      setTotalCost(flow.totalCost);
+      setTotalWattage(flow.totalWattage);
+      setTotalStorage(flow.totalStorage);
+    };
+    if (event.target.files) fileReader.readAsText(event.target.files[0]);
+  }, []);
+
   const solarSubmit = (formData: z.infer<typeof solarFormSchema>) => {
     const selectPanel = solarPanels.find((panel) => panel.brand === formData.solarPanel);
     setTotalCost(totalCost + selectPanel!.price);
@@ -102,9 +136,11 @@ function Flow() {
       position: { x: Math.random() * 500, y: Math.random() * 500 },
       data: { 
         label: formData.solarPanel + " ☀️",
+        price: selectPanel!.price,
+        wattage: selectPanel!.wattage,
       },
       style: { width: 180, height: 40 },
-      type: 'default',
+      type: 'panel',
     };
     setNodes(nodes => [...nodes, newNode]);
   };
@@ -118,21 +154,23 @@ function Flow() {
       position: { x: Math.random() * 500, y: Math.random() * 500 },
       data: { 
         label: formData.battery + " ️🔋",
+        price: selectBattery!.price,
+        capacity: selectBattery!.capacity,
       },
       style: { width: 180, height: 40 },
-      type: 'default',
+      type: 'battery',
     };
     setNodes(nodes => [...nodes, newNode]);
   };
 
 
   return (
-    <div style={{ height: "80vh", width: "90vw"}}>
-      <ReactFlow nodes={nodes} edges={edges} onNodesChange={onNodesChange} onEdgesChange={onEdgesChange} onConnect={onConnect}>
+    <div style={{ height: "80vh", width: "100vw"}}>
+      <ReactFlow nodeTypes={nodeTypes} nodes={nodes} edges={edges} onNodesChange={onNodesChange} onEdgesChange={onEdgesChange} onConnect={onConnect}>
       <Background lineWidth={2} variant={BackgroundVariant.Lines}/>
       </ReactFlow>
       <Separator />
-      <div className="flex gap-4 flex-row content-center p-4">
+      <div className="h-1/5 flex gap-4 flex-row place-content-around items-center p-4 w-4/5">
       <Form {...solarForm}>
         <form onSubmit={solarForm.handleSubmit(solarSubmit)}
           className="space-y-8">
@@ -160,7 +198,7 @@ function Flow() {
               </FormItem>
             )}
           />
-          <Button type="submit">Submit</Button>
+          <Button className="!mt-4" type="submit">Submit</Button>
           </form>
       </Form>
       <Form {...batteryForm}>
@@ -190,15 +228,18 @@ function Flow() {
               </FormItem>
             )}
           />
-          <Button type="submit">Submit</Button>
+          <Button className="!mt-4" type="submit">Submit</Button>
           </form>
       </Form>
-      <Separator orientation="vertical"/>
       <div className="flex flex-col place-content-between">
         <p>Total Cost: ${totalCost}</p>
         <p>Total Wattage: {totalWattage}W</p>
         <p>Total Storage: {totalStorage}Wh</p>
-        <Button onClick={() => {setNodes([]); setEdges([]); setTotalCost(0); setTotalWattage(0); setTotalStorage(0);}}>Reset</Button>
+        <Button className="w-fit mt-2" onClick={() => {setNodes([]); setEdges([]); setTotalCost(0); setTotalWattage(0); setTotalStorage(0);}}>Reset</Button>
+      </div>
+      <div className="flex flex-col place-content-around p-4 gap-4">
+        <Button className="justify-start w-fit" onClick={onSave}>Save</Button>
+        <Input type="file" onChange={onRestore} />
       </div>
       </div>
     </div>
