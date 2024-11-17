@@ -27,7 +27,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <SidebarProvider>
       <AppSidebar />
       <main>
-        <SidebarTrigger />
+        <SidebarTrigger/>
         {children}
       </main>
     </SidebarProvider>
