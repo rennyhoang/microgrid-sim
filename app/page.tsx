@@ -1,15 +1,7 @@
-import { ReactFlow, Controls, Background } from '@xyflow/react';
-import '@xyflow/react/dist/style.css';
- 
-function Flow() {
+import Flow from "./components/Flow";
+
+export default function Home() {
   return (
-    <div style={{ height: '100vh', width: '100vw' }}>
-      <ReactFlow>
-        <Background />
-        <Controls />
-      </ReactFlow>
-    </div>
+    <Flow />
   );
 }
- 
-export default Flow;
