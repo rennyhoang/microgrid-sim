@@ -4,8 +4,9 @@ type BatteryNodeData = { label: string, price: number, capacity: number };
 type BatteryNode = Node<BatteryNodeData, 'battery'>;
 
 export default function BatteryNode({ data }: NodeProps<BatteryNode>) {
+  const scale = Math.max(0.5, Math.min(2, data.capacity / 5000));
   return (
-      <div className="relative bg-gray-800 rounded-lg p-4 w-32 border-2 border-yellow-400">
+      <div className="relative bg-gray-800 rounded-lg p-4 w-32 border-2 border-yellow-400" style={{transform: `scale(${scale})`}}>
   <Handle type="target" position={Position.Top} id="a" />
   <div className="flex flex-col items-center">
     <div className="w-16 h-24 bg-gray-600 rounded relative mb-2">

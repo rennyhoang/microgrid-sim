@@ -23,10 +23,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Separator } from "@/components/ui/separator"
 import { Input } from "@/components/ui/input"
 import BatteryNode from './BatteryNode';
 import PanelNode from './PanelNode';
+import { Moon, Sun } from "lucide-react"
+import { useTheme } from "next-themes"
 
 interface SolarPanel {
   brand: string;
@@ -163,14 +171,15 @@ function Flow() {
     setNodes(nodes => [...nodes, newNode]);
   };
 
+  const { setTheme } = useTheme()
 
   return (
     <div style={{ height: "80vh", width: "100vw"}}>
-      <ReactFlow nodeTypes={nodeTypes} nodes={nodes} edges={edges} onNodesChange={onNodesChange} onEdgesChange={onEdgesChange} onConnect={onConnect}>
+      <ReactFlow defaultEdgeOptions={{animated: true, style: {strokeWidth: 3, stroke: "gold" }}} connectionRadius={30} nodeTypes={nodeTypes} nodes={nodes} edges={edges} onNodesChange={onNodesChange} onEdgesChange={onEdgesChange} onConnect={onConnect}>
       <Background lineWidth={2} variant={BackgroundVariant.Lines}/>
       </ReactFlow>
       <Separator />
-      <div className="h-1/5 flex gap-4 flex-row place-content-around items-center p-4 w-4/5">
+      <div className="h-1/5 flex gap-4 flex-row place-content-around items-center p-4">
       <Form {...solarForm}>
         <form onSubmit={solarForm.handleSubmit(solarSubmit)}
           className="space-y-8">
@@ -238,10 +247,30 @@ function Flow() {
         <Button className="w-fit mt-2" onClick={() => {setNodes([]); setEdges([]); setTotalCost(0); setTotalWattage(0); setTotalStorage(0);}}>Reset</Button>
       </div>
       <div className="flex flex-col place-content-around p-4 gap-4">
-        <Button className="justify-start w-fit" onClick={onSave}>Save</Button>
+        <Button className="justify-start w-fit" onClick={onSave}>Save to File</Button>
         <Input type="file" onChange={onRestore} />
       </div>
       </div>
+      <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="icon">
+          <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+          <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+          <span className="sr-only">Toggle theme</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={() => setTheme("light")}>
+          Light
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme("dark")}>
+          Dark
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme("system")}>
+          System
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
     </div>
   );
 }
